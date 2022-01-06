@@ -4,13 +4,14 @@
 		"annotations": [],
 		"type": "AzureBlobStorage",
 		"typeProperties": {
-			"connectionString": {
+			"sasUri": {
 				"type": "AzureKeyVaultSecret",
 				"store": {
 					"referenceName": "KV_LS",
 					"type": "LinkedServiceReference"
 				},
-				"secretName": "blob-conn"
+				"secretName": "blob-conn",
+				"secretVersion": "9fc7515defd64437aad35cfc8c3c0a25"
 			}
 		}
 	},
