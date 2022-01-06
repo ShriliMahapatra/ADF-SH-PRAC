@@ -44,12 +44,23 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@activity('Get filelist').output.childItems",
+						"type": "Expression"
+					},
 					"batchCount": 3,
 					"activities": [
 						{
 							"name": "load_data",
 							"type": "Copy",
-							"dependsOn": [],
+							"dependsOn": [
+								{
+									"activity": "tablename",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
 							"policy": {
 								"timeout": "7.00:00:00",
 								"retry": 0,
@@ -72,6 +83,10 @@
 								},
 								"sink": {
 									"type": "SnowflakeSink",
+									"preCopyScript": {
+										"value": "@{toUpper(concat('truncate table public.',variables('v_tablename')))}",
+										"type": "Expression"
+									},
 									"importSettings": {
 										"type": "SnowflakeImportCopyCommand",
 										"additionalCopyOptions": {
@@ -103,11 +118,27 @@
 									}
 								}
 							]
+						},
+						{
+							"name": "tablename",
+							"description": "holding the table name which is going to be truncated before load",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "v_tablename",
+								"value": "@toUpper(first(split(item().name,'.')))"
+							}
 						}
 					]
 				}
 			}
 		],
+		"variables": {
+			"v_tablename": {
+				"type": "String"
+			}
+		},
 		"annotations": []
 	}
 }
