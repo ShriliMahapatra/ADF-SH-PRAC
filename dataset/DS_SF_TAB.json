@@ -14,7 +14,7 @@
 		"type": "SnowflakeTable",
 		"schema": [],
 		"typeProperties": {
-			"schema": "INFORMATION_SCHEMA",
+			"schema": " PRAC_SH",
 			"table": {
 				"value": "@dataset().tablename",
 				"type": "Expression"
