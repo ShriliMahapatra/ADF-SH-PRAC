@@ -111,7 +111,7 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "DS_SF_CP_TAB",
+									"referenceName": "DS_SF_TAB",
 									"type": "DatasetReference"
 								}
 							]
