@@ -124,7 +124,7 @@
 				"type": "SnowflakeTable",
 				"schema": [],
 				"typeProperties": {
-					"schema": "INFORMATION_SCHEMA",
+					"schema": "PUBLIC",
 					"table": {
 						"value": "@dataset().tablename",
 						"type": "Expression"
