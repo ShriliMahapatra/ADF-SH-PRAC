@@ -1,0 +1,24 @@
+{
+	"name": "DS_SF_TAB",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_SF_CONN",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"tablename": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "SnowflakeTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "INFORMATION_SCHEMA",
+			"table": {
+				"value": "@dataset().tablename",
+				"type": "Expression"
+			}
+		}
+	}
+}

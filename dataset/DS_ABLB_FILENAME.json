@@ -1,19 +1,26 @@
 {
-	"name": "DelimitedText2",
+	"name": "DS_ABLB_FILENAME",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorage1",
 			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"filename": {
+				"type": "string"
+			}
 		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"container": "data2"
+				"container": "data"
 			},
 			"columnDelimiter": ",",
+			"rowDelimiter": "\r\n",
 			"escapeChar": "\\",
+			"firstRowAsHeader": true,
 			"quoteChar": "\""
 		},
 		"schema": []
