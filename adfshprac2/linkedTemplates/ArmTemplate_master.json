@@ -7,13 +7,21 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "adfshprac2"
 		},
-		"AzureBlobStorage1_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
+		"AzureBlobStorage1_properties_typeProperties_sasUri_secretName": {
+			"type": "string",
+			"defaultValue": "blob-conn"
 		},
-		"LS_SF_CONN_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_SF_CONN'"
+		"LS_SF_CONN_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "snowflake-conn"
+		},
+		"KV_LS_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://KV-LS-ADF.vault.azure.net/"
+		},
+		"LS_SF_CONN_S_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "snowflake-conn"
 		},
 		"containerUri": {
 			"type": "string",
@@ -42,11 +50,17 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
-					"AzureBlobStorage1_connectionString": {
-						"value": "[parameters('AzureBlobStorage1_connectionString')]"
+					"KV_LS_properties_typeProperties_baseUrl": {
+						"value": "[parameters('KV_LS_properties_typeProperties_baseUrl')]"
 					},
-					"LS_SF_CONN_connectionString": {
-						"value": "[parameters('LS_SF_CONN_connectionString')]"
+					"AzureBlobStorage1_properties_typeProperties_sasUri_secretName": {
+						"value": "[parameters('AzureBlobStorage1_properties_typeProperties_sasUri_secretName')]"
+					},
+					"LS_SF_CONN_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('LS_SF_CONN_properties_typeProperties_connectionString_secretName')]"
+					},
+					"LS_SF_CONN_S_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('LS_SF_CONN_S_properties_typeProperties_connectionString_secretName')]"
 					}
 				}
 			},

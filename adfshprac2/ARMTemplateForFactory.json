@@ -7,13 +7,21 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "adfshprac2"
 		},
-		"AzureBlobStorage1_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
+		"AzureBlobStorage1_properties_typeProperties_sasUri_secretName": {
+			"type": "string",
+			"defaultValue": "blob-conn"
 		},
-		"LS_SF_CONN_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'LS_SF_CONN'"
+		"LS_SF_CONN_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "snowflake-conn"
+		},
+		"KV_LS_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://KV-LS-ADF.vault.azure.net/"
+		},
+		"LS_SF_CONN_S_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "snowflake-conn"
 		}
 	},
 	"variables": {
@@ -28,10 +36,20 @@
 				"annotations": [],
 				"type": "AzureBlobStorage",
 				"typeProperties": {
-					"connectionString": "[parameters('AzureBlobStorage1_connectionString')]"
+					"sasUri": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "KV_LS",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "[parameters('AzureBlobStorage1_properties_typeProperties_sasUri_secretName')]",
+						"secretVersion": "9fc7515defd64437aad35cfc8c3c0a25"
+					}
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/KV_LS')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_SF_CONN')]",
@@ -41,10 +59,19 @@
 				"annotations": [],
 				"type": "Snowflake",
 				"typeProperties": {
-					"connectionString": "[parameters('LS_SF_CONN_connectionString')]"
+					"connectionString": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "KV_LS",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "[parameters('LS_SF_CONN_properties_typeProperties_connectionString_secretName')]"
+					}
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/KV_LS')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_CT_TAB')]",
@@ -208,6 +235,10 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						},
 						"container": "data"
 					},
 					"columnDelimiter": ",",
@@ -283,6 +314,215 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_ABLB_FILENAME')]",
 				"[concat(variables('factoryId'), '/datasets/DS_SF_TAB')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_LD_TAB')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get filelist",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_ABLB_FILELIST",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "load file in loop",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get filelist",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get filelist').output.childItems",
+								"type": "Expression"
+							},
+							"batchCount": 3,
+							"activities": [
+								{
+									"name": "load_data",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "tablename",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "SnowflakeSink",
+											"importSettings": {
+												"type": "SnowflakeImportCopyCommand",
+												"additionalCopyOptions": {
+													"FORCE": "TRUE",
+													"ON_ERROR": "SKIP_FILE"
+												}
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_ABLB_FILENAME",
+											"type": "DatasetReference",
+											"parameters": {
+												"filename": {
+													"value": "@item().name",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_SF_TAB",
+											"type": "DatasetReference",
+											"parameters": {
+												"tablename": "@toUpper(first(split(item().name,'.')))"
+											}
+										}
+									]
+								},
+								{
+									"name": "tablename",
+									"description": "holding the table name which is going to be truncated before load",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "v_tablename",
+										"value": "@toUpper(first(split(item().name,'.')))"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"variables": {
+					"v_tablename": {
+						"type": "String"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ABLB_FILELIST')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ABLB_FILENAME')]",
+				"[concat(variables('factoryId'), '/datasets/DS_SF_TAB')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_SF_CP_TAB')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_SF_CONN_S",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SnowflakeTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "PUBLIC",
+					"table": "EMPLOYEE_DATA"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_SF_CONN_S')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/KV_LS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('KV_LS_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_SF_CONN_S')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "Snowflake",
+				"typeProperties": {
+					"connectionString": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "KV_LS",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "[parameters('LS_SF_CONN_S_properties_typeProperties_connectionString_secretName')]",
+						"secretVersion": "b3c8b3ea85af438e9a97b0477d708e0f"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/KV_LS')]"
 			]
 		}
 	]
