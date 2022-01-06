@@ -112,7 +112,10 @@
 							"outputs": [
 								{
 									"referenceName": "DS_SF_TAB",
-									"type": "DatasetReference"
+									"type": "DatasetReference",
+									"parameters": {
+										"tablename": "@toUpper(first(split(item().name,'.')))"
+									}
 								}
 							]
 						},
