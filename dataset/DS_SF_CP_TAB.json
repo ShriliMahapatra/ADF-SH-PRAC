@@ -2,7 +2,7 @@
 	"name": "DS_SF_CP_TAB",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "LS_SF_CONN",
+			"referenceName": "LS_SF_CONN_S",
 			"type": "LinkedServiceReference"
 		},
 		"annotations": [],
