@@ -111,11 +111,8 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "DS_SF_TAB",
-									"type": "DatasetReference",
-									"parameters": {
-										"tablename": "@toUpper(first(split(item().name,'.')))"
-									}
+									"referenceName": "DS_SF_CP_TAB",
+									"type": "DatasetReference"
 								}
 							]
 						},
