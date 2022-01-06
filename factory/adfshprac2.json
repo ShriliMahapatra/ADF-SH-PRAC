@@ -1,0 +1,9 @@
+{
+	"name": "adfshprac2",
+	"location": "uksouth",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "582545ad-4ea0-45ad-a366-482bdf4f8068",
+		"tenantId": "b8cd21aa-e1f1-4c84-b5f6-645280315c85"
+	}
+}
