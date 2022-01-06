@@ -345,6 +345,10 @@
 										},
 										"sink": {
 											"type": "SnowflakeSink",
+											"preCopyScript": {
+												"value": "@{toUpper(concat('truncate table public.',variables('v_tablename')))}",
+												"type": "Expression"
+											},
 											"importSettings": {
 												"type": "SnowflakeImportCopyCommand",
 												"additionalCopyOptions": {
