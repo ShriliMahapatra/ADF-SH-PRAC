@@ -13,7 +13,6 @@
 				"container": "data"
 			},
 			"columnDelimiter": ",",
-			"rowDelimiter": "\r\n",
 			"escapeChar": "\\",
 			"firstRowAsHeader": true,
 			"quoteChar": "\""
